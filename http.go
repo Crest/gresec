@@ -40,11 +40,17 @@ func GetAllNodes(store *NodeStore) func(http.ResponseWriter, *http.Request) {
 		for _, node := range store.GetAll() {
 			fmt.Fprintln(w, node)
 		}
+		var peerCN string
+		if len(req.TLS.PeerCertificates) > 0 {
+			peerCN = req.TLS.PeerCertificates[0].Subject.CommonName 
+		} else {
+			peerCN = ""
+		}
+
 		fmt.Printf("complete    = %v\n", req.TLS.HandshakeComplete)
 		fmt.Printf("cipherSuite = %v\n", req.TLS.CipherSuite)
 		fmt.Printf("protocol    = %v\n", req.TLS.NegotiatedProtocol)
 		fmt.Printf("  mutual?   = %v\n", req.TLS.NegotiatedProtocolIsMutual)
-		fmt.Printf("peerCert    = %v\n", req.TLS.PeerCertificates)
-		fmt.Printf("req.Tls = %#v\n", req.TLS)
+		fmt.Printf("peerCN      = %v\n", peerCN)
 	}
 }

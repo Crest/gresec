@@ -55,7 +55,7 @@ func listenAndServe(addr string, certFile string, keyFile string, caFile string)
 		Time:               time.Seconds,
 		NextProtos:         []string{"http/1.1"},
 		AuthenticateClient: true,
-		CipherSuites: []uint16{tls.TLS_RSA_WITH_AES_128_CBC_SHA},
+		CipherSuites:       []uint16{tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA},
 	}
 
 	rootCert, err := ioutil.ReadFile(caFile)
