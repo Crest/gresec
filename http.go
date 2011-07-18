@@ -9,8 +9,8 @@ func setContentText(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "text/plain")
 }
 
-func GetNodeByName(store *NodeStore) func (http.ResponseWriter, *http.Request) {
-	return func (w http.ResponseWriter, req *http.Request) {
+func GetNodeByName(store *NodeStore) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
 		setContentText(w)
 		name := req.URL.Path[lenNamePath:]
 		node, present := store.Get(name)
@@ -22,8 +22,8 @@ func GetNodeByName(store *NodeStore) func (http.ResponseWriter, *http.Request) {
 	}
 }
 
-func SetNodeByName(store *NodeStore) func (http.ResponseWriter, *http.Request) {
-	return func (w http.ResponseWriter, req *http.Request) {
+func SetNodeByName(store *NodeStore) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
 		setContentText(w)
 		var node Node
 		if _, err := fmt.Fscanln(req.Body, &node); err != nil {
@@ -35,7 +35,7 @@ func SetNodeByName(store *NodeStore) func (http.ResponseWriter, *http.Request) {
 }
 
 func GetAllNodes(store *NodeStore) func(http.ResponseWriter, *http.Request) {
-	return func (w http.ResponseWriter, req *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
 		setContentText(w)
 		for _, node := range store.GetAll() {
 			fmt.Fprintln(w, node)

@@ -1,11 +1,16 @@
 package main
 
 import "bytes"
+import "net"
 import "io"
+import "io/ioutil"
 import "os"
 import "time"
 import "fmt"
 import "http"
+import "crypto/rand"
+import "crypto/tls"
+import "crypto/x509"
 
 var errEOF = io.ErrUnexpectedEOF
 
@@ -44,6 +49,40 @@ func readNodes(r io.Reader) (map[string]Node, os.Error) {
 	return nodes, nil
 }
 
+func listenAndServe(addr string, certFile string, keyFile string, caFile string) os.Error {
+	config := &tls.Config{
+		Rand:               rand.Reader,
+		Time:               time.Seconds,
+		NextProtos:         []string{"http/1.1"},
+		AuthenticateClient: true,
+		CipherSuites: []uint16{tls.TLS_RSA_WITH_AES_128_CBC_SHA},
+	}
+
+	rootCert, err := ioutil.ReadFile(caFile)
+	if err != nil {
+		return err
+	}
+	config.RootCAs = x509.NewCertPool()
+	if !config.RootCAs.AppendCertsFromPEM(rootCert) {
+		return os.NewError("Failed to add root certificate.")
+	}
+
+	config.Certificates = make([]tls.Certificate, 1)
+	config.Certificates[0], err = tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		return err
+	}
+
+	conn, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
+	}
+
+	tlsListener := tls.NewListener(conn, config)
+	return http.Serve(tlsListener, nil)
+}
+
+
 func main() {
 	buf := bytes.NewBufferString("eq4 46.4.89.243 10.0.0.2 2001:470:9ce6:200::2")
 	nodes, err := readNodes(buf)
@@ -60,5 +99,9 @@ func main() {
 	http.HandleFunc("/name/", GetNodeByName(store))
 	http.HandleFunc("/set", SetNodeByName(store))
 	http.HandleFunc("/all", GetAllNodes(store))
-	http.ListenAndServeTLS(":8080", "cert.pem", "key.pem", nil)
+
+	err = listenAndServe(":8080", "cert.pem", "key.pem", "cacert.pem")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERR: %v\n", err)
+	}
 }

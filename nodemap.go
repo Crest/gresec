@@ -6,16 +6,16 @@ import "gosqlite.googlecode.com/hg/sqlite"
 
 type NodeStore struct {
 	nodes map[string]*Node
-	db *sqlite.Conn
+	db    *sqlite.Conn
 	sync.RWMutex
 }
 
 func NewNodeStore(filename string) (*NodeStore, os.Error) {
-	conn, err  := sqlite.Open(filename)
+	conn, err := sqlite.Open(filename)
 	if err != nil {
 		return nil, err
 	}
-	return &NodeStore{ nodes : make(map[string]*Node), db : conn }, nil
+	return &NodeStore{nodes: make(map[string]*Node), db: conn}, nil
 }
 
 func (store *NodeStore) Set(node *Node) {
