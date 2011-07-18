@@ -45,5 +45,6 @@ func GetAllNodes(store *NodeStore) func(http.ResponseWriter, *http.Request) {
 		fmt.Printf("protocol    = %v\n", req.TLS.NegotiatedProtocol)
 		fmt.Printf("  mutual?   = %v\n", req.TLS.NegotiatedProtocolIsMutual)
 		fmt.Printf("peerCert    = %v\n", req.TLS.PeerCertificates)
+		fmt.Printf("req.Tls = %#v\n", req.TLS)
 	}
 }
